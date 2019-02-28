@@ -6,16 +6,28 @@ abstract class Drawable {
   bufIdx: WebGLBuffer;
   bufPos: WebGLBuffer;
   bufNor: WebGLBuffer;
-  bufTranslate: WebGLBuffer;
   bufCol: WebGLBuffer;
   bufUV: WebGLBuffer;
+
+  bufBranchPos:WebGLBuffer;
+  bufBranchLook:WebGLBuffer;
+  bufBranchUp:WebGLBuffer;
+  bufBranchRight:WebGLBuffer;
+
+  bufLPos : WebGLBuffer;
 
   idxGenerated: boolean = false;
   posGenerated: boolean = false;
   norGenerated: boolean = false;
   colGenerated: boolean = false;
-  translateGenerated: boolean = false;
   uvGenerated: boolean = false;
+
+  BposGenerated: boolean = false;
+  BlookGenerated: boolean = false;
+  BupGenerated:boolean = false;
+  BrightGenerated: boolean = false;
+
+  LposGenerated:boolean = false;
 
   numInstances: number = 0; // How many instances of this Drawable the shader program should draw
 
@@ -26,8 +38,14 @@ abstract class Drawable {
     gl.deleteBuffer(this.bufPos);
     gl.deleteBuffer(this.bufNor);
     gl.deleteBuffer(this.bufCol);
-    gl.deleteBuffer(this.bufTranslate);
     gl.deleteBuffer(this.bufUV);
+
+    gl.deleteBuffer(this.bufBranchPos);
+    gl.deleteBuffer(this.bufBranchLook);
+    gl.deleteBuffer(this.bufBranchRight);
+    gl.deleteBuffer(this.bufBranchUp);
+
+    gl.deleteBuffer(this.bufLPos);
   }
 
   generateIdx() {
@@ -50,14 +68,35 @@ abstract class Drawable {
     this.bufCol = gl.createBuffer();
   }
 
-  generateTranslate() {
-    this.translateGenerated = true;
-    this.bufTranslate = gl.createBuffer();
-  }
 
   generateUV() {
     this.uvGenerated = true;
     this.bufUV = gl.createBuffer();
+  }
+
+  generateBpos(){
+    this.BposGenerated = true;
+    this.bufBranchPos = gl.createBuffer();
+  }
+
+  generateBlook(){
+    this.BlookGenerated = true;
+    this.bufBranchLook = gl.createBuffer();
+  }
+
+  generateBup(){
+    this.BupGenerated = true;
+    this.bufBranchUp = gl.createBuffer();
+  }
+
+  generateBright(){
+    this.BrightGenerated = true;
+    this.bufBranchRight = gl.createBuffer();
+  }
+
+  generateLpos(){
+    this.LposGenerated = true;
+    this.bufLPos = gl.createBuffer();
   }
 
   bindIdx(): boolean {
@@ -88,18 +127,46 @@ abstract class Drawable {
     return this.colGenerated;
   }
 
-  bindTranslate(): boolean {
-    if (this.translateGenerated) {
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.bufTranslate);
-    }
-    return this.translateGenerated;
-  }
-
   bindUV(): boolean {
     if (this.uvGenerated) {
       gl.bindBuffer(gl.ARRAY_BUFFER, this.bufUV);
     }
     return this.uvGenerated;
+  }
+
+  bindBpos(): boolean{
+    if(this.BposGenerated){
+      gl.bindBuffer(gl.ARRAY_BUFFER,this.bufBranchPos);
+    }
+    return this.BposGenerated;
+  }
+
+  bindBlook(): boolean{
+      if(this.BlookGenerated){
+          gl.bindBuffer(gl.ARRAY_BUFFER,this.bufBranchLook);
+      }
+      return this.BlookGenerated;
+  }
+
+  bindBup(): boolean{
+      if(this.BupGenerated){
+          gl.bindBuffer(gl.ARRAY_BUFFER,this.bufBranchUp);
+      }
+      return this.BupGenerated;
+  }
+
+  bindBright(): boolean{
+      if(this.BrightGenerated){
+          gl.bindBuffer(gl.ARRAY_BUFFER,this.bufBranchRight);
+      }
+      return this.BrightGenerated;
+  }
+
+  bindLpos():boolean{
+    if(this.LposGenerated){
+      gl.bindBuffer(gl.ARRAY_BUFFER,this.bufLPos);
+    }
+    return this.LposGenerated;
   }
 
   elemCount(): number {

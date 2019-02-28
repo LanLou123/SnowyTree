@@ -10,12 +10,6 @@ in vec4 vs_Pos; // Non-instanced; each particle is the same quad drawn in a diff
 in vec4 vs_Nor; // Non-instanced, and presently unused
 in vec2 vs_UV; // Non-instanced, and presently unused in main(). Feel free to use it for your meshes.
 
-in vec4 vs_Bpos;
-in vec4 vs_Blook;
-in vec4 vs_Bup;
-in vec4 vs_Bright;
-
-
 out vec4 fs_Col;
 out vec4 fs_Pos;
 out vec4 fs_Nor;
@@ -25,21 +19,8 @@ void main()
 
     fs_Pos = vs_Pos;
 
+    fs_Nor = vs_Nor;
 
 
-    mat4 rot;
-    rot[0] = vs_Bpos;
-    rot[1] = vs_Blook;
-    rot[2] = vs_Bup;
-    rot[3] = vs_Bright;
-    fs_Nor = transpose(inverse(rot))*vs_Nor;
-
-
-
-
-    vec4 billboardPos =  rot*vs_Pos;//vs_Pos.x * u_CameraAxes[0] + vs_Pos.y * u_CameraAxes[1];
-
-
-
-    gl_Position = u_ViewProj * billboardPos;
+    gl_Position = u_ViewProj *  vs_Pos;
 }
