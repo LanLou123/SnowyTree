@@ -33,6 +33,8 @@ class ShaderProgram {
 
   attrLpos : number;
 
+  attrSpos : number;
+
   unifModel: WebGLUniformLocation;
   unifModelInvTr: WebGLUniformLocation;
   unifViewProj: WebGLUniformLocation;
@@ -65,6 +67,7 @@ class ShaderProgram {
     this.attrBright = gl.getAttribLocation(this.prog, "vs_Bright");
 
     this.attrLpos = gl.getAttribLocation(this.prog,"vs_Lpos");
+    this.attrSpos = gl.getAttribLocation(this.prog,"vs_Spos");
 
     this.unifModel      = gl.getUniformLocation(this.prog, "u_Model");
     this.unifModelInvTr = gl.getUniformLocation(this.prog, "u_ModelInvTr");
@@ -196,6 +199,12 @@ class ShaderProgram {
       gl.vertexAttribDivisor(this.attrLpos,1);
     }
 
+    if(this.attrSpos!=-1&&d.bindSpos()){
+      gl.enableVertexAttribArray(this.attrSpos);
+      gl.vertexAttribPointer(this.attrSpos,3,gl.FLOAT,false,0,0);
+      gl.vertexAttribDivisor(this.attrSpos,1);
+    }
+
     // TODO: Set up attribute data for additional instanced rendering data as needed
 
     d.bindIdx();
@@ -223,6 +232,7 @@ class ShaderProgram {
     if (this.attrBup != -1) gl.disableVertexAttribArray(this.attrBup);
 
     if(this.attrLpos!=-1) gl.disableVertexAttribArray(this.attrLpos);
+    if(this.attrSpos!=-1) gl.disableVertexAttribArray(this.attrSpos);
   }
 };
 

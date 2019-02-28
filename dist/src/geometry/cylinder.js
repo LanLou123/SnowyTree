@@ -1,9 +1,10 @@
 import Drawable from '../rendering/gl/Drawable';
 import { gl } from '../globals';
 class Cylinder extends Drawable {
-    constructor(numDivisions) {
+    constructor(numDivisions, h) {
         super(); // Call the constructor of the super class. This is required.
         this.numDivisions = numDivisions;
+        this.h = h;
     }
     create() {
         let positions = [];
@@ -12,7 +13,7 @@ class Cylinder extends Drawable {
         for (let i = 0; i < this.numDivisions; i++) {
             let x = 0.05 * Math.cos(i * 2 * Math.PI / this.numDivisions);
             let z = 0.05 * Math.sin(i * 2 * Math.PI / this.numDivisions);
-            positions.push(x, 0.2, z, 1);
+            positions.push(x, this.h, z, 1);
             positions.push(x, 0, z, 1);
             normals.push(x, 0, z, 1);
             normals.push(x, 0, z, 1);

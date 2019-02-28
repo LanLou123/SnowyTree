@@ -16,6 +16,10 @@ import {readTextFile} from './globals';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
+  NumSnowFlakes : 6000,
+  LsystemAngle : 18,
+  LsystemStepsize : 0.2,
+  'Load Scene' :loadScene,
 };
 
 
@@ -25,29 +29,52 @@ let cylinder : Cylinder;
 let plane : Plane;
 
 let Leaf : Mesh;
-
+let snow : Square;
 let myL : Lsystem;
 
-let g0 : string = 'FA';
-let g1 : string = 'A->F[&LFLA]//////[&FLA]///////[&F*LA]';
-let g2 : string = 'F->S//F';
+let g0 : string = 'FFFA';
+let g1 : string = 'A->/F[&&FFA]L///[&&FFA]///[&FFA]/////[&FF*LA]';
+let g2 : string = 'F->!^S//F';
 let g3 : string = 'S->FL';
-let g4 : string = 'L->[^^-f+f+f-f+/f+++ff|-f+f+f]';
+let g4 : string = 'L->[^^-/+f|-f+f+f]';
+let g5 : string = 'M->[//^^&ff-ff-]'
 
-let str = g0+'\n'+g1+'\n'+g2+'\n'+g3+'\n'+g4+'\n' ;
+let str = g0+'\n'+g1+'\n'+g2+'\n'+g3+'\n'+g4+'\n'+g5+'\n' ;
 
 function loadScene() {
 
-  plane = new Plane(vec3.fromValues(0,0,0), vec2.fromValues(150,150), 20);
+
+
+  plane = new Plane(vec3.fromValues(0,0,0), vec2.fromValues(450,450), 20);
   plane.create();
+  snow = new Square(0.7);
+  snow.create();
+
+  let snowNum = controls.NumSnowFlakes;
+  let snowPosArray = [];
+  for(let i = 0;i<snowNum;i++){
+    let rnd1 = 450*(Math.random()-0.5);
+    let rnd2 = 300*Math.random();
+    let rnd3 = 450*(Math.random()-0.5);
+    snowPosArray.push(rnd1);
+    snowPosArray.push(rnd2);
+    snowPosArray.push(rnd3);
+
+  }
+  let snowPos:Float32Array = new Float32Array(snowPosArray);
+  snow.setInstanceVBOs(snowPos);
+  snow.setNumInstances(snowNum);
+
   plane.setNumInstances(1);
   screenQuad = new ScreenQuad();
   screenQuad.create();
-  cylinder = new Cylinder(10);//new Mesh("./obj/cylinder.obj",vec3.fromValues(0,0,0));
+  cylinder = new Cylinder(10,controls.LsystemStepsize);//new Mesh("./obj/cylinder.obj",vec3.fromValues(0,0,0));
   cylinder.create();
   myL = new Lsystem();
+  myL.setAngle(controls.LsystemAngle);
+  myL.setStepSize(controls.LsystemStepsize);
   myL.readString(str);
-  myL.doThings(8);
+  myL.doThings(7);
   // Set up instanced rendering data arrays here.
   // This example creates a set of positional
   // offsets and gradiated colors for a 100x100 grid
@@ -88,7 +115,7 @@ function loadScene() {
 
     let dis = myL.BranchList[i].depth;
 
-    dis = (myL.maxdp-dis-10)/6;
+    dis = (myL.maxdp-dis-1)/6;
 
 
     vec3.normalize(dir,dir);
@@ -187,6 +214,14 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
+  gui.add(controls,'NumSnowFlakes',3000,10000).step(10);
+  gui.add(controls,'LsystemAngle',10,40).step(1);
+  gui.add(controls,'LsystemStepsize',0.1,1).step(0.01);
+    gui.add(controls,'Load Scene');
+
+
+
+
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -201,7 +236,7 @@ function main() {
   // Initial call to load scene
   loadScene();
 
-  const camera = new Camera(vec3.fromValues(5, 0, 0), vec3.fromValues(0, 0, 0));
+  const camera = new Camera(vec3.fromValues(0, 20, 60), vec3.fromValues(0, 20, 0));
 
 
 
@@ -233,12 +268,18 @@ function main() {
       new Shader(gl.FRAGMENT_SHADER, require('./shaders/ground-frag.glsl')),
   ]);
 
+  const snowShader = new ShaderProgram([
+      new Shader(gl.VERTEX_SHADER, require('./shaders/snow-vert.glsl')),
+      new Shader(gl.FRAGMENT_SHADER, require('./shaders/snow-frag.glsl')),
+  ]);
+
   // This function will be called every frame
   function tick() {
     camera.update();
 
     stats.begin();
     instancedShader.setTime(time);
+    snowShader.setTime(time);
     flat.setTime(time++);
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
@@ -247,12 +288,15 @@ function main() {
 
     renderer.render(camera, flat, [screenQuad]);
 
-    var fbo = _createFBO(gl);
+
 
     renderer.render(camera,groundShader,[plane]);
     renderer.render(camera, instancedShader, [cylinder]);
     renderer.render(camera,leafShader,[Leaf]);
-
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.ONE, gl.ONE); // Additive blending
+    renderer.render(camera,snowShader,[snow]);
+      gl.disable(gl.BLEND);
       stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

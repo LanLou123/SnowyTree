@@ -12,6 +12,7 @@ class Drawable {
         this.BupGenerated = false;
         this.BrightGenerated = false;
         this.LposGenerated = false;
+        this.SposGenerated = false;
         this.numInstances = 0; // How many instances of this Drawable the shader program should draw
     }
     destory() {
@@ -25,6 +26,7 @@ class Drawable {
         gl.deleteBuffer(this.bufBranchRight);
         gl.deleteBuffer(this.bufBranchUp);
         gl.deleteBuffer(this.bufLPos);
+        gl.deleteBuffer(this.bufSPos);
     }
     generateIdx() {
         this.idxGenerated = true;
@@ -65,6 +67,10 @@ class Drawable {
     generateLpos() {
         this.LposGenerated = true;
         this.bufLPos = gl.createBuffer();
+    }
+    generateSpos() {
+        this.SposGenerated = true;
+        this.bufSPos = gl.createBuffer();
     }
     bindIdx() {
         if (this.idxGenerated) {
@@ -125,6 +131,12 @@ class Drawable {
             gl.bindBuffer(gl.ARRAY_BUFFER, this.bufLPos);
         }
         return this.LposGenerated;
+    }
+    bindSpos() {
+        if (this.SposGenerated) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.bufSPos);
+        }
+        return this.SposGenerated;
     }
     elemCount() {
         return this.count;

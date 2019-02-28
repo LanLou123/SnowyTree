@@ -43,6 +43,7 @@ float noise (in vec2 st) {
 #define OCTAVES 6
 float fbm (in vec2 st) {
     // Initial values
+    st/=10.f;
     float value = 0.0;
     float amplitude = .5;
     float frequency = 0.;
@@ -53,7 +54,7 @@ float fbm (in vec2 st) {
         st *= 2.;
         amplitude *= .5;
     }
-    return value;
+    return value*10.f;
 }
 
 void main()

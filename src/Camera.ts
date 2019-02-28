@@ -21,6 +21,7 @@ class Camera {
 
         this.controls = CameraControls(canvas, {
             position: position,
+            eye : position,//this is stupid
             center: target,
         });
 

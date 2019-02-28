@@ -17,6 +17,7 @@ class Camera {
         const canvas = document.getElementById('canvas');
         this.controls = CameraControls(canvas, {
             position: position,
+            eye: position,
             center: target,
         });
         vec3.add(this.target, this.position, this.direction);

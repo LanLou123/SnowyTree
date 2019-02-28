@@ -7,16 +7,17 @@ class Cylinder extends Drawable {
     positions: Float32Array;
     normals: Float32Array;
     numDivisions: number;
-
+    h:number;
     branchPos:Float32Array;
     branchLook:Float32Array;
     branchUp:Float32Array;
     branchRight:Float32Array;
 
 
-    constructor(numDivisions: number) {
+    constructor(numDivisions: number,h:number) {
         super(); // Call the constructor of the super class. This is required.
         this.numDivisions = numDivisions;
+        this.h = h;
     }
 
     create() {
@@ -29,7 +30,7 @@ class Cylinder extends Drawable {
             let x = 0.05 * Math.cos(i * 2 * Math.PI / this.numDivisions);
             let z = 0.05 * Math.sin(i * 2 * Math.PI / this.numDivisions);
 
-            positions.push(x, 0.2, z, 1);
+            positions.push(x, this.h, z, 1);
             positions.push(x, 0, z, 1);
             normals.push(x,0,z,1);
             normals.push(x,0,z,1);

@@ -15,6 +15,7 @@ abstract class Drawable {
   bufBranchRight:WebGLBuffer;
 
   bufLPos : WebGLBuffer;
+  bufSPos:WebGLBuffer;
 
   idxGenerated: boolean = false;
   posGenerated: boolean = false;
@@ -28,6 +29,7 @@ abstract class Drawable {
   BrightGenerated: boolean = false;
 
   LposGenerated:boolean = false;
+  SposGenerated:boolean = false;
 
   numInstances: number = 0; // How many instances of this Drawable the shader program should draw
 
@@ -46,6 +48,7 @@ abstract class Drawable {
     gl.deleteBuffer(this.bufBranchUp);
 
     gl.deleteBuffer(this.bufLPos);
+    gl.deleteBuffer(this.bufSPos);
   }
 
   generateIdx() {
@@ -97,6 +100,11 @@ abstract class Drawable {
   generateLpos(){
     this.LposGenerated = true;
     this.bufLPos = gl.createBuffer();
+  }
+
+  generateSpos(){
+    this.SposGenerated = true;
+    this.bufSPos = gl.createBuffer();
   }
 
   bindIdx(): boolean {
@@ -167,6 +175,13 @@ abstract class Drawable {
       gl.bindBuffer(gl.ARRAY_BUFFER,this.bufLPos);
     }
     return this.LposGenerated;
+  }
+
+  bindSpos():boolean{
+    if(this.SposGenerated){
+      gl.bindBuffer(gl.ARRAY_BUFFER,this.bufSPos);
+    }
+    return this.SposGenerated;
   }
 
   elemCount(): number {

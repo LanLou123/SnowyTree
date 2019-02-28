@@ -10,7 +10,7 @@ out vec4 out_Col;
 
 #define FOV 45.f
 vec3 sky(in vec3 rd){
-    return mix(vec3(0.3,0.3,0.3),vec3(0.1,0.2,0.4),clamp(rd.y,0.f,1.f));
+    return mix(vec3(0.6,0.6,0.6),vec3(0.3,0.5,0.9),clamp(rd.y,0.f,1.f));
 }
 
 void main() {

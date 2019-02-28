@@ -55,7 +55,7 @@ export class Node{
 export class Lsystem{
     NodeList : Array<Node> = [];
     BranchList : Array<Branch> = [];
-    Angle : number = 20;
+    Angle : number = 18;
     StepSize : number = 0.2;
     Grammar : string;
     Expansion : Map<string,string>;
@@ -171,9 +171,13 @@ export class Lsystem{
                 turtle.rotateAroundRight(this.getrndAngle());
             }
             else if(cur =="^"){
-                turtle.rotateAroundRight(-this.getrndAngle());
+                let p = Math.random();
+                if(p>0.5)
+                turtle.rotateAroundRight(-this.getrndAngle()/15);
+                else
+                    turtle.rotateAroundRight(this.getrndAngle()/15);
             }
-            else if(cur =="\\"){
+            else if(cur =="!"){
                 turtle.rotateAroundLook(this.getrndAngle());
             }
             else if(cur=="/"){

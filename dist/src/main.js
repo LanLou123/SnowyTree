@@ -1,6 +1,7 @@
 import { vec3, quat, mat4, vec2 } from 'gl-matrix';
 import * as Stats from 'stats-js';
 import * as DAT from 'dat-gui';
+import Square from './geometry/Square';
 import Plane from './geometry/plane';
 import ScreenQuad from './geometry/ScreenQuad';
 import Mesh from './geometry/Mesh';
@@ -13,30 +14,54 @@ import ShaderProgram, { Shader } from './rendering/gl/ShaderProgram';
 import { readTextFile } from './globals';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
-const controls = {};
+const controls = {
+    NumSnowFlakes: 6000,
+    LsystemAngle: 18,
+    LsystemStepsize: 0.2,
+    'Load Scene': loadScene,
+};
 let screenQuad;
 let time = 0.0;
 let cylinder;
 let plane;
 let Leaf;
+let snow;
 let myL;
-let g0 = 'FA';
-let g1 = 'A->F[&LFLA]//////[&FLA]///////[&F*LA]';
-let g2 = 'F->S//F';
+let g0 = 'FFFA';
+let g1 = 'A->/F[&&FFA]L///[&&FFA]///[&FFA]/////[&FF*LA]';
+let g2 = 'F->!^S//F';
 let g3 = 'S->FL';
-let g4 = 'L->[^^-f+f+f-f+/f+++ff|-f+f+f]';
-let str = g0 + '\n' + g1 + '\n' + g2 + '\n' + g3 + '\n' + g4 + '\n';
+let g4 = 'L->[^^-/+f|-f+f+f]';
+let g5 = 'M->[//^^&ff-ff-]';
+let str = g0 + '\n' + g1 + '\n' + g2 + '\n' + g3 + '\n' + g4 + '\n' + g5 + '\n';
 function loadScene() {
-    plane = new Plane(vec3.fromValues(0, 0, 0), vec2.fromValues(150, 150), 20);
+    plane = new Plane(vec3.fromValues(0, 0, 0), vec2.fromValues(450, 450), 20);
     plane.create();
+    snow = new Square(0.7);
+    snow.create();
+    let snowNum = controls.NumSnowFlakes;
+    let snowPosArray = [];
+    for (let i = 0; i < snowNum; i++) {
+        let rnd1 = 450 * (Math.random() - 0.5);
+        let rnd2 = 300 * Math.random();
+        let rnd3 = 450 * (Math.random() - 0.5);
+        snowPosArray.push(rnd1);
+        snowPosArray.push(rnd2);
+        snowPosArray.push(rnd3);
+    }
+    let snowPos = new Float32Array(snowPosArray);
+    snow.setInstanceVBOs(snowPos);
+    snow.setNumInstances(snowNum);
     plane.setNumInstances(1);
     screenQuad = new ScreenQuad();
     screenQuad.create();
-    cylinder = new Cylinder(10); //new Mesh("./obj/cylinder.obj",vec3.fromValues(0,0,0));
+    cylinder = new Cylinder(10, controls.LsystemStepsize); //new Mesh("./obj/cylinder.obj",vec3.fromValues(0,0,0));
     cylinder.create();
     myL = new Lsystem();
+    myL.setAngle(controls.LsystemAngle);
+    myL.setStepSize(controls.LsystemStepsize);
     myL.readString(str);
-    myL.doThings(8);
+    myL.doThings(7);
     // Set up instanced rendering data arrays here.
     // This example creates a set of positional
     // offsets and gradiated colors for a 100x100 grid
@@ -68,7 +93,7 @@ function loadScene() {
         vec3.subtract(len, myL.BranchList[i].end, myL.BranchList[i].start);
         let curlen = vec3.length(len);
         let dis = myL.BranchList[i].depth;
-        dis = (myL.maxdp - dis - 10) / 6;
+        dis = (myL.maxdp - dis - 1) / 6;
         vec3.normalize(dir, dir);
         quat.rotationTo(rotq, vec3.fromValues(0, 1, 0), dir);
         let rotmat = mat4.create();
@@ -142,6 +167,10 @@ function main() {
     document.body.appendChild(stats.domElement);
     // Add controls to the gui
     const gui = new DAT.GUI();
+    gui.add(controls, 'NumSnowFlakes', 3000, 10000).step(10);
+    gui.add(controls, 'LsystemAngle', 10, 40).step(1);
+    gui.add(controls, 'LsystemStepsize', 0.1, 1).step(0.01);
+    gui.add(controls, 'Load Scene');
     // get canvas and webgl context
     const canvas = document.getElementById('canvas');
     const gl = canvas.getContext('webgl2');
@@ -153,7 +182,7 @@ function main() {
     setGL(gl);
     // Initial call to load scene
     loadScene();
-    const camera = new Camera(vec3.fromValues(5, 0, 0), vec3.fromValues(0, 0, 0));
+    const camera = new Camera(vec3.fromValues(0, 20, 60), vec3.fromValues(0, 20, 0));
     const renderer = new OpenGLRenderer(canvas);
     renderer.setClearColor(0.2, 0.2, 0.2, 1);
     //gl.enable(gl.BLEND);
@@ -175,19 +204,27 @@ function main() {
         new Shader(gl.VERTEX_SHADER, require('./shaders/ground-vert.glsl')),
         new Shader(gl.FRAGMENT_SHADER, require('./shaders/ground-frag.glsl')),
     ]);
+    const snowShader = new ShaderProgram([
+        new Shader(gl.VERTEX_SHADER, require('./shaders/snow-vert.glsl')),
+        new Shader(gl.FRAGMENT_SHADER, require('./shaders/snow-frag.glsl')),
+    ]);
     // This function will be called every frame
     function tick() {
         camera.update();
         stats.begin();
         instancedShader.setTime(time);
+        snowShader.setTime(time);
         flat.setTime(time++);
         gl.viewport(0, 0, window.innerWidth, window.innerHeight);
         renderer.clear();
         renderer.render(camera, flat, [screenQuad]);
-        var fbo = _createFBO(gl);
         renderer.render(camera, groundShader, [plane]);
         renderer.render(camera, instancedShader, [cylinder]);
         renderer.render(camera, leafShader, [Leaf]);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.ONE, gl.ONE); // Additive blending
+        renderer.render(camera, snowShader, [snow]);
+        gl.disable(gl.BLEND);
         stats.end();
         // Tell the browser to call `tick` again whenever it renders a new frame
         requestAnimationFrame(tick);

@@ -6,7 +6,7 @@ class Square extends Drawable {
   indices: Uint32Array;
   positions: Float32Array;
   colors: Float32Array;
-  offsets: Float32Array; // Data for bufTranslate
+  spos: Float32Array; // Data for bufTranslate
   len :number = 10;
 
   constructor(len:number) {
@@ -27,7 +27,7 @@ class Square extends Drawable {
 
     this.generateIdx();
     this.generatePos();
-    this.generateCol();
+    this.generateSpos();
 
 
     this.count = this.indices.length;
@@ -40,12 +40,11 @@ class Square extends Drawable {
     console.log(`Created square`);
   }
 
-  setInstanceVBOs(offsets: Float32Array, colors: Float32Array) {
-    this.colors = colors;
-    this.offsets = offsets;
+  setInstanceVBOs(offsets: Float32Array) {
+    this.spos = offsets;
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.bufCol);
-    gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.bufSPos);
+    gl.bufferData(gl.ARRAY_BUFFER, this.spos, gl.STATIC_DRAW);
 
 
   }

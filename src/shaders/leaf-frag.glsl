@@ -11,5 +11,7 @@ void main()
 {
     vec3 ld = normalize(vec3(1));
     float lamb = dot(ld,normalize(fs_Nor.xyz));
-    out_Col =   vec4(vec3(0.2f,1.f,0.f)*lamb,1);
+    vec4 col = vec4(vec3(0.2f,.6f,0.f)*lamb,1);
+    if(fs_Nor.y>.8f) col= vec4(vec3(1.f,1.f,1.f)*lamb,1);;
+    out_Col =col;
 }

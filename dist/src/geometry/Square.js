@@ -15,7 +15,7 @@ class Square extends Drawable {
             -this.len, 0, this.len, 1]);
         this.generateIdx();
         this.generatePos();
-        this.generateCol();
+        this.generateSpos();
         this.count = this.indices.length;
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.bufIdx);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
@@ -23,11 +23,10 @@ class Square extends Drawable {
         gl.bufferData(gl.ARRAY_BUFFER, this.positions, gl.STATIC_DRAW);
         console.log(`Created square`);
     }
-    setInstanceVBOs(offsets, colors) {
-        this.colors = colors;
-        this.offsets = offsets;
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.bufCol);
-        gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
+    setInstanceVBOs(offsets) {
+        this.spos = offsets;
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.bufSPos);
+        gl.bufferData(gl.ARRAY_BUFFER, this.spos, gl.STATIC_DRAW);
     }
 }
 ;

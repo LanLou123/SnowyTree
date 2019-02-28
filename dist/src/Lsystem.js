@@ -26,7 +26,7 @@ export class Lsystem {
     constructor() {
         this.NodeList = [];
         this.BranchList = [];
-        this.Angle = 20;
+        this.Angle = 18;
         this.StepSize = 0.2;
         this.Iterations = [];
         this.maxdp = 0;
@@ -132,9 +132,13 @@ export class Lsystem {
                 turtle.rotateAroundRight(this.getrndAngle());
             }
             else if (cur == "^") {
-                turtle.rotateAroundRight(-this.getrndAngle());
+                let p = Math.random();
+                if (p > 0.5)
+                    turtle.rotateAroundRight(-this.getrndAngle() / 15);
+                else
+                    turtle.rotateAroundRight(this.getrndAngle() / 15);
             }
-            else if (cur == "\\") {
+            else if (cur == "!") {
                 turtle.rotateAroundLook(this.getrndAngle());
             }
             else if (cur == "/") {

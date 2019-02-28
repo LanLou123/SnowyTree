@@ -21,7 +21,7 @@ out vec4 fs_Nor;
 void main()
 {
 
-    fs_Pos = vs_Pos;
+
 
 
     fs_Nor = vs_Nor;
@@ -32,7 +32,7 @@ void main()
 
     vec4 billboardPos =  vec4(vs_Lpos,0.f)+ sc*vs_Pos;
 
-
+    fs_Pos = billboardPos;
 
 
     gl_Position = u_ViewProj * billboardPos;
