@@ -1,8 +1,7 @@
 import { vec3, vec4, mat4 } from 'gl-matrix';
 import { Turtle } from './Turtle';
 export class Branch {
-    constructor(start, end, starts = 1, ends = 1, look, up, right, t1, t2, t3, t4) {
-        this.fixstep = 1.3;
+    constructor(start, end, starts = 1, ends = 1, look, up, right, t1, t2, t3, t4, dp) {
         this.start = start;
         this.end = end;
         this.startSize = starts;
@@ -14,6 +13,7 @@ export class Branch {
         this.trans2 = t2;
         this.trans3 = t3;
         this.trans4 = t4;
+        this.depth = dp;
     }
 }
 export class Node {
@@ -29,6 +29,7 @@ export class Lsystem {
         this.Angle = 20;
         this.StepSize = 0.2;
         this.Iterations = [];
+        this.maxdp = 0;
         this.Expansion = new Map();
     }
     clear() {
@@ -43,6 +44,22 @@ export class Lsystem {
     }
     setStepSize(dis) {
         this.StepSize = dis;
+    }
+    getrndAngle() {
+        let p = Math.random();
+        if (p > 0 && p < 0.2) {
+            return this.Angle / 1.6;
+        }
+        else if (p > 0.2 && p < 0.4) {
+            return this.Angle / 1.3;
+        }
+        else if (p > 0.4 && p < 0.6) {
+            return this.Angle;
+        }
+        else if (p > 0.6 && p < 0.8) {
+            return this.Angle * 1.3;
+        }
+        return this.Angle * 1.6;
     }
     advanceGrammar(str) {
         let res = "";
@@ -75,7 +92,6 @@ export class Lsystem {
     }
     doThings(n) {
         let turtle = new Turtle();
-        turtle.steps = this.StepSize;
         let stack = new Array();
         let tx = this.getInteration(n);
         turtle.rotateAroundRight(-90);
@@ -92,38 +108,37 @@ export class Lsystem {
                 let t4 = vec4.fromValues(turtle.transform[12], turtle.transform[13], turtle.transform[14], turtle.transform[15]);
                 let p = Math.random();
                 if (p > 0.3) {
-                    turtle.steps = this.StepSize;
                     turtle.moveforward(this.StepSize);
                 }
                 else {
-                    turtle.steps = this.StepSize * 1.5;
                     turtle.moveforward(this.StepSize * 1.5);
                 }
                 let end = vec3.create();
                 vec3.copy(end, turtle.pos);
-                this.BranchList.push(new Branch(start, end, Math.max(0.05, Math.pow(0.95, turtle.depth)), Math.max(0.05, Math.pow(0.95, turtle.depth + 1)), look, up, right, t1, t2, t3, t4));
+                this.BranchList.push(new Branch(start, end, Math.max(0.05, Math.pow(0.95, turtle.depth)), Math.max(0.05, Math.pow(0.95, turtle.depth + 1)), look, up, right, t1, t2, t3, t4, turtle.depth));
+                this.maxdp = Math.max(this.maxdp, turtle.depth);
             }
             else if (cur == "f") {
-                turtle.steps = this.StepSize;
                 turtle.moveforward(this.StepSize);
+                this.maxdp = Math.max(this.maxdp, turtle.depth);
             }
             else if (cur == "+") {
-                turtle.rotateAroundUp(this.Angle);
+                turtle.rotateAroundUp(this.getrndAngle());
             }
             else if (cur == "-") {
-                turtle.rotateAroundUp(-this.Angle);
+                turtle.rotateAroundUp(-this.getrndAngle());
             }
             else if (cur == "&") {
-                turtle.rotateAroundRight(this.Angle);
+                turtle.rotateAroundRight(this.getrndAngle());
             }
             else if (cur == "^") {
-                turtle.rotateAroundRight(-this.Angle);
+                turtle.rotateAroundRight(-this.getrndAngle());
             }
             else if (cur == "\\") {
-                turtle.rotateAroundLook(this.Angle);
+                turtle.rotateAroundLook(this.getrndAngle());
             }
             else if (cur == "/") {
-                turtle.rotateAroundLook(-this.Angle);
+                turtle.rotateAroundLook(-this.getrndAngle());
             }
             else if (cur == "|") {
                 turtle.rotateAroundLook(180);
@@ -136,7 +151,6 @@ export class Lsystem {
                 vec3.copy(curt.right, turtle.right);
                 mat4.copy(curt.transform, turtle.transform);
                 curt.depth = turtle.depth;
-                curt.steps = turtle.steps;
                 stack.push(curt);
             }
             else if (cur == "]") {

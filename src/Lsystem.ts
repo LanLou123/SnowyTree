@@ -13,8 +13,7 @@ export class Branch{
     trans2:vec4;
     trans3:vec4;
     trans4:vec4;
-    fixstep :number = 1.3;
-    steps :number;
+    depth : number;
 
     constructor(start:vec3,
                 end:vec3,
@@ -26,7 +25,8 @@ export class Branch{
                 t1:vec4,
                 t2:vec4,
                 t3:vec4,
-                t4:vec4){
+                t4:vec4,
+                dp:number){
 
         this.start = start;
         this.end = end;
@@ -39,6 +39,7 @@ export class Branch{
         this.trans2 = t2;
         this.trans3 = t3;
         this.trans4 = t4;
+        this.depth=dp;
     }
 }
 
@@ -60,6 +61,7 @@ export class Lsystem{
     Expansion : Map<string,string>;
     Iterations : Array<string> = [];
     Current : string;
+    maxdp:number = 0;
     constructor(){this.Expansion = new Map<string, string>()}
 
     clear(){
@@ -78,6 +80,17 @@ export class Lsystem{
     setStepSize(dis:number){
         this.StepSize = dis;
     }
+
+    getrndAngle(){
+        let p = Math.random();
+        if(p>0&&p<0.2){return this.Angle/1.6;}
+        else if(p>0.2&&p<0.4){return this.Angle/1.3;}
+        else if(p>0.4&&p<0.6){return this.Angle;}
+        else if(p>0.6&&p<0.8){return this.Angle*1.3;}
+        return this.Angle*1.6;
+    }
+
+
 
     advanceGrammar(str:string){
         let res = "";
@@ -111,7 +124,6 @@ export class Lsystem{
 
     doThings(n:number){
         let turtle = new Turtle();
-         turtle.steps = this.StepSize;
         let stack = new Array();
         let tx = this.getInteration(n);
         turtle.rotateAroundRight(-90);
@@ -128,12 +140,10 @@ export class Lsystem{
                 let t4:vec4 = vec4.fromValues(turtle.transform[12],turtle.transform[13],turtle.transform[14],turtle.transform[15]);
                 let p = Math.random();
                 if(p>0.3) {
-                    turtle.steps = this.StepSize;
                     turtle.moveforward(this.StepSize);
 
                 }
                 else {
-                    turtle.steps = this.StepSize*1.5;
                     turtle.moveforward(this.StepSize*1.5);
 
                 }
@@ -144,29 +154,30 @@ export class Lsystem{
                     Math.max(0.05,Math.pow(0.95,turtle.depth+1)),
                     look,
                     up,
-                    right,t1,t2,t3,t4));
+                    right,t1,t2,t3,t4,turtle.depth));
+                this.maxdp = Math.max(this.maxdp,turtle.depth);
             }
             else if(cur =="f"){
-                turtle.steps = this.StepSize;
                 turtle.moveforward(this.StepSize);
+                this.maxdp = Math.max(this.maxdp,turtle.depth);
             }
             else if(cur == "+"){
-                turtle.rotateAroundUp(this.Angle);
+                turtle.rotateAroundUp(this.getrndAngle());
             }
             else if(cur =="-"){
-                turtle.rotateAroundUp(-this.Angle);
+                turtle.rotateAroundUp(-this.getrndAngle());
             }
             else if(cur =="&"){
-                turtle.rotateAroundRight(this.Angle);
+                turtle.rotateAroundRight(this.getrndAngle());
             }
             else if(cur =="^"){
-                turtle.rotateAroundRight(-this.Angle);
+                turtle.rotateAroundRight(-this.getrndAngle());
             }
             else if(cur =="\\"){
-                turtle.rotateAroundLook(this.Angle);
+                turtle.rotateAroundLook(this.getrndAngle());
             }
             else if(cur=="/"){
-                turtle.rotateAroundLook(-this.Angle);
+                turtle.rotateAroundLook(-this.getrndAngle());
             }
             else if(cur =="|"){
                 turtle.rotateAroundLook(180);
@@ -179,13 +190,12 @@ export class Lsystem{
                 vec3.copy(curt.right,turtle.right);
                 mat4.copy(curt.transform,turtle.transform);
                 curt.depth = turtle.depth;
-                curt.steps = turtle.steps;
                 stack.push(curt);
             }
             else if(cur=="]"){
                 turtle = stack.pop();
             }
-            else if(cur =="*"){
+            else if(cur=="*"){
                 let pos:vec3 = vec3.fromValues(turtle.pos[0],turtle.pos[1],turtle.pos[2]);
                 this.NodeList.push(new Node(pos,cur));
             }

@@ -26,7 +26,7 @@ void main()
 
     fs_Nor = vs_Nor;
 
-    mat4 sc = mat4(0.003);
+    mat4 sc = mat4(0.006);
     sc[3][3] = 1.f;
 
 

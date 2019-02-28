@@ -32,12 +32,14 @@ void main()
     rot[1] = vs_Blook;
     rot[2] = vs_Bup;
     rot[3] = vs_Bright;
+
+    float h = vs_Pos.y/80.f;
+
+    float fac = mix(0.f,sin((u_Time+(0.3*vs_Pos.x+2.f*vs_Pos.z)*4.f)/100.f),h);
+
     fs_Nor = transpose(inverse(rot))*vs_Nor;
 
-
-
-
-    vec4 billboardPos =  rot*vs_Pos;//vs_Pos.x * u_CameraAxes[0] + vs_Pos.y * u_CameraAxes[1];
+    vec4 billboardPos =  rot*(vs_Pos+vec4(0.f,0.f,0.f,0.f));
 
 
 

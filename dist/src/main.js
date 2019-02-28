@@ -20,12 +20,12 @@ let cylinder;
 let plane;
 let Leaf;
 let myL;
-let g0 = 'A';
+let g0 = 'FA';
 let g1 = 'A->F[&LFLA]//////[&FLA]///////[&F*LA]';
-let g2 = 'F->S////////F';
+let g2 = 'F->S//F';
 let g3 = 'S->FL';
 let g4 = 'L->[^^-f+f+f-f+/f+++ff|-f+f+f]';
-let str = g0 + '\n' + g1 + '\n' + g2 + '\n' + g3 + '\n';
+let str = g0 + '\n' + g1 + '\n' + g2 + '\n' + g3 + '\n' + g4 + '\n';
 function loadScene() {
     plane = new Plane(vec3.fromValues(0, 0, 0), vec2.fromValues(150, 150), 20);
     plane.create();
@@ -36,7 +36,7 @@ function loadScene() {
     cylinder.create();
     myL = new Lsystem();
     myL.readString(str);
-    myL.doThings(7);
+    myL.doThings(8);
     // Set up instanced rendering data arrays here.
     // This example creates a set of positional
     // offsets and gradiated colors for a 100x100 grid
@@ -67,8 +67,8 @@ function loadScene() {
         let len = vec3.create();
         vec3.subtract(len, myL.BranchList[i].end, myL.BranchList[i].start);
         let curlen = vec3.length(len);
-        let dis = vec3.length(myL.BranchList[i].start);
-        dis = 23 - dis;
+        let dis = myL.BranchList[i].depth;
+        dis = (myL.maxdp - dis - 10) / 6;
         vec3.normalize(dir, dir);
         quat.rotationTo(rotq, vec3.fromValues(0, 1, 0), dir);
         let rotmat = mat4.create();
@@ -103,6 +103,34 @@ function loadScene() {
     let BranchRight = new Float32Array(BranchRightArray);
     cylinder.setInstanceVBOs(BranchPos, BranchLook, BranchUp, BranchRight);
     cylinder.setNumInstances(myL.BranchList.length); // grid of "particles"
+}
+function _createFBO(gl) {
+    var frame_buffer, color_buffer, depth_buffer;
+    frame_buffer = gl.createFramebuffer();
+    color_buffer = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, color_buffer);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, window.innerWidth, window.innerHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    depth_buffer = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, depth_buffer);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, window.innerWidth, window.innerHeight, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, frame_buffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, color_buffer, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depth_buffer, 0);
+    let status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    if (status != gl.FRAMEBUFFER_COMPLETE) {
+        console.log("framebuffer invalidly created :" + status.toString());
+    }
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    return frame_buffer;
 }
 function main() {
     // Initial display for framerate
@@ -156,6 +184,7 @@ function main() {
         gl.viewport(0, 0, window.innerWidth, window.innerHeight);
         renderer.clear();
         renderer.render(camera, flat, [screenQuad]);
+        var fbo = _createFBO(gl);
         renderer.render(camera, groundShader, [plane]);
         renderer.render(camera, instancedShader, [cylinder]);
         renderer.render(camera, leafShader, [Leaf]);
