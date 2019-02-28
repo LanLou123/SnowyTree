@@ -1,8 +1,10 @@
 # Tree in snow
-## A L-system procedural tree in webGL 
+## An L-system procedural tree in webGL 
 #### pennkey and name : lanlou
+
 ![](tree.gif)
 
+[DEMO](https://lanlou123.github.io/hw04-l-systems/)
 
 ## Base structure:
 - Lsystem class : a container class for all Lsystem related elements:
@@ -48,7 +50,7 @@
 - NumSnowFlakes: number of instances for snow flakes
 - LSystemAngle : the turning angle for lsystem
 - LsystemStepsize : the step size for each move of turtle
-- load scene : don't forget to push this button once u change one of the above properties
+- load scene : don't forget to click this button once u change one of the above properties
     
 ## Reference
 - [algorithm for botany](http://algorithmicbotany.org/papers/#abop)
