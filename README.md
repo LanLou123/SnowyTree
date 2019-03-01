@@ -37,6 +37,11 @@
     - rotateAroundLook : same story
     - rotateAroundRight : same story
 
+## Grammar and mapping
+- start Axiom ： ``` FFFFA ```
+- grammar1 : A = ``` /F[&&FFA]L///[&&FFA]///[&FFA]/////[&FF*LA] ```
+- grammar2 : F = ``` !^S//F ```
+- grammar3 : S = ``` FL ```
 
 ## Instance rendering
 
