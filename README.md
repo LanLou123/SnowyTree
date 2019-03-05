@@ -4,7 +4,7 @@
 
 ![](tree.gif)
 
-[DEMO](https://lanlou123.github.io/hw04-l-systems/)
+[DEMO](https://lanlou123.github.io/SnowyTree/)
 
 ## Base structure:
 - Lsystem class : a container class for all Lsystem related elements:
